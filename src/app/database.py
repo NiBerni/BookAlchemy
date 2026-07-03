@@ -1,21 +1,25 @@
 """Database connection and session management."""
 
 import logging
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 logger = logging.getLogger(__name__)
 
-# In production, this URL comes from environment variables
-# Using a local SQLite database for local development ease
-DATABASE_URL = "sqlite:///./local_dev.db"
 
-# Create the SQLAlchemy 2.1 Engine
+BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
+os.makedirs(DATA_DIR, exist_ok=True)
+
+DATABASE_URL = f"sqlite:///{os.path.join(DATA_DIR, 'library.sqlite3')}"
+
 engine = create_engine(
     DATABASE_URL,
-    echo=False,  # Set to True to see raw SQL queries in the terminal
-    future=True,  # Enforce SQLAlchemy 2.0+ strict behavior
+    echo=False,
+    future=True,
 )
 
 # Create a session factory
@@ -31,3 +35,11 @@ SessionFactory = sessionmaker(
 def get_session() -> Session:
     """Provides a transactional scope around a series of operations."""
     return SessionFactory()
+
+
+def init_db() -> None:
+    """Initializes database tables. Call this within the app factory."""
+    from .models import Base
+
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database initialized at {DATABASE_URL}.")
