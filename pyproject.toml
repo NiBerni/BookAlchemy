@@ -1,0 +1,20 @@
+[tool.ruff]
+# Zielversion für den Linter/Formatter
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+# Aktiviere Pyflakes (F), pycodestyle (E, W), isort (I) und Upgrade-Regeln (UP)
+select = ["E", "F", "W", "I", "UP"]
+ignore = []
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+# Warnungen ignorieren, die oft durch Third-Party Libraries geworfen werden
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
