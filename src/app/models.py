@@ -1,7 +1,8 @@
 import uuid
-from typing import Any, List
+from datetime import date
+from typing import Any, List, Optional
 
-from sqlalchemy import ForeignKey, String, Uuid
+from sqlalchemy import Date, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 

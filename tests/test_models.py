@@ -3,19 +3,8 @@ import uuid
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from app.database import engine, get_session
-from app.models import Author, Base, Book
-
-
-@pytest.fixture(autouse=True)
-def setup_database():
-    """Ensures tables are created before tests and cleanly rolled back	after each test."""
-    Base.metadata.drop_all(bind=engine)
-
-    Base.metadata.create_all(bind=engine)
-    yield
-
-    Base.metadata.drop_all(bind=engine)
+from app.database import get_session
+from app.models import Author, Book
 
 
 def test_create_author_and_book():
