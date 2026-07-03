@@ -1,15 +1,14 @@
 from datetime import date
 
-import pytest
 from flask.testing import FlaskClient
 
-from app.database import engine, get_session
-from app.models import Author, Base, Book
+from app.database import get_session
+from app.models import Author, Book
 
 
 def test_health_check_success(client: FlaskClient) -> None:
     """Ensures the health check endpoint returns 200 OK and expected payload."""
-    response = client.get("/")
+    response = client.get("/health")
     assert response.status_code == 200
 
     data = response.get_json()
@@ -56,14 +55,13 @@ def test_add_book_post(client: FlaskClient) -> None:
         author = Author(name="George Orwell", birth_date=date(1903, 6, 25))
         session.add(author)
         session.commit()
-        author_id = author.id
 
     response = client.post(
         "/add_book",
         data={
             "title": "1984",
             "isbn": "9780451524935",
-            "publication_year": 1949,
+            "publication_year": "1949",
             "author_id": str(author.id),
         },
         follow_redirects=True,
