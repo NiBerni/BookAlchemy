@@ -1,20 +1,28 @@
-[tool.ruff]
-# Zielversion für den Linter/Formatter
-target-version = "py314"
-line-length = 100
+[project]
+name = "flask-alchemy"
+version = "0.1.0"
+description = "Flask, SQLAlchemy 2.1, Python 3.14 backbone"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "flask>=3.0.0",
+    "sqlalchemy==2.1.0b3", # Pinned exactly to the requested beta version
+    "psycopg2-binary>=2.9.9", # Standard Postgres driver
+    "gunicorn>=21.2.0"
+]
 
-[tool.ruff.lint]
-# Aktiviere Pyflakes (F), pycodestyle (E, W), isort (I) und Upgrade-Regeln (UP)
-select = ["E", "F", "W", "I", "UP"]
-ignore = []
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-flask>=1.3.0",
+    "pylint>=3.0.0"
+]
 
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "8.0"
 addopts = "-ra -q"
-testpaths = [
-    "tests",
-]
-# Warnungen ignorieren, die oft durch Third-Party Libraries geworfen werden
-filterwarnings = [
-    "ignore::DeprecationWarning",
-]
+testpaths = ["tests"]
+
+[tool.pylint.messages_control]
+# Adjust strictly based on project policy
+disable = ["C0114", "C0115", "C0116"]just strictly based on project policy

@@ -1,14 +1,14 @@
 .PHONY: help build up down test lint logs clean
 
 help:
-	@echo "Verfügbare Befehle:"
-	@echo "  make build  - Baut die Docker-Images neu"
-	@echo "  make up     - Startet die Container im Hintergrund"
-	@echo "  make down   - Stoppt und entfernt die Container"
-	@echo "  make logs   - Zeigt die Logs des Web-Containers"
-	@echo "  make test   - Führt Pytest im Container aus"
-	@echo "  make lint   - Führt den Ruff Linter und Formatter aus"
-	@echo "  make clean  - Entfernt Cache-Dateien"
+	@echo "Available commands:"
+	@echo "  make build  - Rebuilds Docker images"
+	@echo "  make up     - Starts containers in background"
+	@echo "  make down   - Stops and removes containers"
+	@echo "  make logs   - Shows web container logs"
+	@echo "  make test   - Runs pytest inside the container"
+	@echo "  make lint   - Runs pylint"
+	@echo "  make clean  - Removes cache files"
 
 build:
 	docker compose build
@@ -26,8 +26,7 @@ test:
 	docker compose exec web pytest -v
 
 lint:
-	docker compose exec web ruff check .
-	docker compose exec web ruff format .
+	docker compose exec web pylint src/app tests/
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
