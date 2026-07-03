@@ -42,4 +42,4 @@ def init_db() -> None:
     from .models import Base
 
     Base.metadata.create_all(bind=engine)
-    logger.info("Database initialized at {DATABASE_URL}.")
+    logger.info(f"Database initialized at {DATABASE_URL}.")
