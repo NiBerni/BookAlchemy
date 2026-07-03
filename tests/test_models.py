@@ -33,3 +33,32 @@ def test_defensive_book_requires_author():
 
 		with pytest.raises(IntegrityError):
 			session.commit()
+
+def test_pep750_tstring_raw_query():
+	"""Verify that PEP 750 t-string implementation securely fetches data."""
+	with get_session() as session:
+		author = Author(name="Isaac Asimov")
+		book = Book(title="Foundation", author=author)
+		session.add(author)
+		session.commit()
+
+		results = Book.find_by_title_secure(session, "Foundation")
+		assert len(results) == 1
+		assert results[0].title == "Foundation"
+
+def test_pep750_tstring_prevents_sql_injection():
+	"""Verify that t-strings neutralize malicious SQL injection attempts."""
+	with get_session() as session:
+		author = Author(name="Isaac Asimov")
+		book = Book(title="Foundation", author=author)
+		session.add(author)
+		session.add(book)
+		session.commit()
+
+		malicious_injection = "Foundation' OR '1'='1 "
+
+		results = Book.find_by_title_secure(session, malicious_injection)
+		assert len(results) == 0
+
+		results = Book.find_by_title_secure(session, "Foundation' OR '1'='1")
+		assert len(results) == 0
