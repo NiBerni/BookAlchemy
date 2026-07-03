@@ -44,7 +44,7 @@ def test_pep750_tstring_raw_query():
     """Verify that PEP 750 t-string implementation securely fetches data."""
     with get_session() as session:
         author = Author(name="Isaac Asimov")
-        book = Book(title="Foundation", author=author)
+        Book(title="Foundation", author=author)
         session.add(author)
         session.commit()
 
