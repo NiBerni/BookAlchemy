@@ -42,10 +42,11 @@ class Book(Base):
     @classmethod
     def find_by_title_secure(cls, session: Any, search_title: str) -> List["Book"]:
         """Find books by title using parameterized queries to prevent SQL injection."""
-        from sqlalchemy import tstring
+        from sqlalchemy import select, tstring
 
         # 🚨 NEVER use f-strings here! Using PEP 750 t-strings (t"...")
         # securely binds the variable at the database driver level.
-        query = tstring(t"SELECT * FROM books WHERE title = {search_title}")
-        result = session.execute(query)
-        return result.scalars().all()
+        raw_query = tstring(t"SELECT * FROM books WHERE title = {search_title}")
+        orm_query = select(cls).from_statement(raw_query)
+        result = session.execute(orm_query)
+        return list(result.scalars().all())
