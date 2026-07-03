@@ -8,9 +8,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Spiegelt den lokalen Code in den Container (für Hot-Reloading)
+
       - .:/app
-      # Verhindert, dass der lokale __pycache__ in den Container überschreibt
+
       - /app/__pycache__
     environment:
       - ENVIRONMENT=development

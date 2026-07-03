@@ -42,4 +42,4 @@ USER appuser
 EXPOSE 8000
 
 # Use Gunicorn (WSGI server) for production-grade Flask deployments
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "wsgi:app"]
+CMD ["gunicorn", "--no-control-socket", "-w", "4", "-b", "0.0.0.0:8000", "wsgi:app"]

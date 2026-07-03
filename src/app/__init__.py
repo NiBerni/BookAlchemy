@@ -15,6 +15,7 @@ def create_app(test_config: Optional[Mapping[str, Any]] = None) -> Flask:
         )
     else:
         app.config.from_mapping(test_config)
+    from . import models
 
     with app.app_context():
         init_db()
