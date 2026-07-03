@@ -21,9 +21,17 @@ class Author(Base):
         Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     name: Mapped[str] = mapped_column(String(150), nullable=False)
+    birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    date_of_death: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     books: Mapped[List["Book"]] = relationship(
         back_populates="author", cascade="all, delete-orphan"
     )
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return f'<Author(id={self.id}, name="{self.name}")>'
 
 
 class Book(Base):
@@ -34,11 +42,20 @@ class Book(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
+    isbn: Mapped[str] = mapped_column(String(13), nullable=False, unique=True)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
+    publication_year: Mapped[int] = mapped_column(Integer, nullable=False)
+
     author_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("authors.id"), nullable=False
     )
     author: Mapped["Author"] = relationship(back_populates="books")
+
+    def __str__(self) -> str:
+        return f"{self.title} by {self.author.name}"
+
+    def __repr__(self) -> str:
+        return f'<Book(isbn={self.isbn}, title="{self.title}")>'
 
     @classmethod
     def find_by_title_secure(cls, session: Any, search_title: str) -> List["Book"]:
