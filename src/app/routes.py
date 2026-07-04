@@ -42,7 +42,7 @@ def home() -> Response | str:
 
     with get_session() as session:
         if search_query:
-            books_raw = Book.search_by_title(session, search_query)
+            books_raw = Book.search_by_keyword_secure(session, search_query)
         else:
             if sort_by == "author":
                 query = select(Book).join(Author).order_by(Author.name)
