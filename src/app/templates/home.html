@@ -20,6 +20,18 @@
 
 <h1>My Digital Library</h1>
 
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('main.add_book') }}"
+       style="display: inline-block; padding: 10px 15px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px; margin-right: 10px;">
+        + Add New Book
+    </a>
+
+    <a href="{{ url_for('main.add_author') }}"
+       style="display: inline-block; padding: 10px 15px; background-color: #28A745; color: white; text-decoration: none; border-radius: 5px;">
+        + Add New Author
+    </a>
+</div>
+
 <form action="/" method="GET">
     <label for="search">Keyword Search:</label>
     <input id="search" name="search" placeholder="Search by title..." type="text" value="{{ search_query }}">
