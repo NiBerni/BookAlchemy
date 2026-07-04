@@ -116,12 +116,14 @@ def add_book() -> Response | str:
         publication_year_str = request.form.get("publication_year")
         author_id_str = request.form.get("author_id")
 
+        # Guard clause: Ensure no fields are empty or None
         if not title or not isbn or not publication_year_str or not author_id_str:
             flash("All fields are required!", "error")
             return redirect(url_for("main.add_book"))
+
         try:
             pub_year = int(publication_year_str)
-            author_id = uuid.UUID(author_id_str)
+            author_id = uuid.UUID(str(author_id_str))
 
             with get_session() as session:
                 new_book = Book(
@@ -132,25 +134,23 @@ def add_book() -> Response | str:
                 )
                 session.add(new_book)
                 session.commit()
+
             flash(f"Book '{new_book.title}' added successfully!", "success")
             return redirect(url_for("main.home"))
+
         except ValueError:
-            logger.warning(
-                "Invalid publication year or author_id. Please enter a valid integer."
-            )
-            flash(
-                "Invalid publication year or author_id. Please enter a valid integer.",
-                "error",
-            )
+            logger.warning("Invalid publication year or author_id.")
+            flash("Invalid data format. Please check your inputs.", "error")
             return redirect(url_for("main.add_book"))
+
         except Exception as e:
             logger.error(f"Error adding book: {e}", exc_info=True)
             flash("An error occurred while adding the book.", "error")
             return redirect(url_for("main.add_book"))
-    with get_session() as session:
-        from sqlalchemy import select
 
-        authors = session.execute(select(Author)).scalars().all()
+    with get_session() as session:
+        # Assumes 'select' is imported at the top of the file
+        authors = session.execute(select(Author).order_by(Author.name)).scalars().all()
 
     return render_template("add_book.html", authors=authors)
 

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Add a New Book</title>
+</head>
+<body>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class="flashes" style="list-style-type: none; padding: 0;">
+    {% for category, message in messages %}
+    <li style="padding: 10px; margin-bottom: 10px; border-radius: 5px;
+                 background-color: {% if category == 'error' %}#f8d7da{% else %}#d4edda{% endif %};
+                 color: {% if category == 'error' %}#721c24{% else %}#155724{% endif %};">
+        {{ message }}
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<h1>Add a New Book</h1>
+
+<form action="/add_book" method="POST">
+    <div style="margin-bottom: 15px;">
+        <label for="title">Book Title:</label><br>
+        <input id="title" name="title" required style="width: 300px;" type="text">
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label for="isbn">ISBN (13 digits):</label><br>
+        <input id="isbn" name="isbn" required style="width: 300px;" type="text">
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label for="publication_year">Publication Year:</label><br>
+        <input id="publication_year" name="publication_year" required style="width: 300px;" type="number">
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label for="author_id">Select Author:</label><br>
+        <select id="author_id" name="author_id" required style="width: 308px;">
+            <option disabled selected value="">-- Choose an Author --</option>
+
+            {% for author in authors %}
+            <option value="{{ author.id }}">{{ author.name }}</option>
+            {% endfor %}
+
+        </select>
+    </div>
+
+    <button style="padding: 10px 20px; cursor: pointer;" type="submit">Add Book</button>
+</form>
+
+<br>
+<a href="/">← Back to Library</a>
+
+</body>
+</html>
