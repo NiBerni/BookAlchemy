@@ -173,7 +173,7 @@ def delete_book(book_id: uuid.UUID) -> Response | str:
             .first()
         )
 
-        if not ramaining_books:
+        if not remaining_books:
             session.delete(author)
             logger.info(
                 f'Deleted author "{author.name}" as they have no remaining books.'
