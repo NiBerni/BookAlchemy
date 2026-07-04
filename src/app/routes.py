@@ -116,7 +116,7 @@ def add_book() -> Response | str:
         publication_year_str = request.form.get("publication_year")
         author_id_str = request.form.get("author_id")
 
-        if not all([title, isbn, publication_year_str, author_id_str]):
+        if not title or not isbn or not publication_year_str or not author_id_str:
             flash("All fields are required!", "error")
             return redirect(url_for("main.add_book"))
         try:
@@ -147,8 +147,12 @@ def add_book() -> Response | str:
             logger.error(f"Error adding book: {e}", exc_info=True)
             flash("An error occurred while adding the book.", "error")
             return redirect(url_for("main.add_book"))
+    with get_session() as session:
+        from sqlalchemy import select
 
-    return render_template("add_book.html")
+        authors = session.execute(select(Author)).scalars().all()
+
+    return render_template("add_book.html", authors=authors)
 
 
 @bp.route("/book/<uuid:book_id>/delete", methods=["POST"])
