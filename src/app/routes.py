@@ -26,8 +26,9 @@ bp = Blueprint("main", __name__)
 @handle_api_errors
 def health_check() -> tuple[Response, int]:
     """
-    Simple health check endpoint.
-    Mandatory to check the availability of the Docker-Container.
+    Returns the current status of the application.
+
+    :rtype: Tuple[Response, int]
     """
     payload = {"status": "ok", "message": "The Python 3.14 Flask Container is running"}
     return jsonify(payload), 200
@@ -36,7 +37,16 @@ def health_check() -> tuple[Response, int]:
 @bp.route("/", methods=["GET"])
 @handle_api_errors
 def home() -> Response | str:
-    """Fetches books, handles sorting and constructs the cover image URL."""
+    """
+    Renders the home page with a list of books.
+
+    :param sort_by: The field by which to sort the books. Default is 'title'.
+    :type sort_by: str
+    :param search_query: The keyword to search for in book titles.
+    :type search_query: str
+    :return: A rendered template containing the home page and book data.
+    :rtype: Response | str
+    """
     sort_by = request.args.get("sort_by", "title")
     search_query = request.args.get("search", "").strip()
 
@@ -68,7 +78,17 @@ def home() -> Response | str:
 @bp.route("/add_author", methods=["GET", "POST"])
 @handle_api_errors
 def add_author() -> Response | str:
-    """Handles the creation of a new author."""
+    """
+    Handles the creation of a new author via a web form.
+
+    GET: Renders the author creation form.
+    POST: Validates the form input, parses optional birth and death dates
+    (expected in YYYY-MM-DD format), and saves the new author to the database.
+
+    :return: A redirect to the homepage on success, or the rendered HTML template
+             with flashed error messages on failure or for GET requests.
+    :rtype: Response | str
+    """
     if request.method == "POST":
         name = request.form.get("name")
         birth_date_str = request.form.get("birth_date")
@@ -109,7 +129,18 @@ def add_author() -> Response | str:
 @bp.route("/add_book", methods=["GET", "POST"])
 @handle_api_errors
 def add_book() -> Response | str:
-    """Handles the creation of a new book."""
+    """
+    Execute the route to add a new book.
+
+    Handles both GET and POST requests.
+    If the request method is POST, it processes the form data, validates inputs, creates a new `Book` object,
+    and adds it to the database. On successful addition, it redirects to the home page with a success message.
+    If any errors occur (such as invalid publication year or author ID), it logs the error, flashes an error message,
+    and redirects back to the book add page.
+
+    If the request method is GET, it retrieves all authors from the database and renders
+    the `add_book.html` template, passing the list of authors to the template.
+    """
     if request.method == "POST":
         title = request.form.get("title")
         isbn = request.form.get("isbn")
@@ -158,7 +189,19 @@ def add_book() -> Response | str:
 @bp.route("/book/<uuid:book_id>/delete", methods=["POST"])
 @handle_api_errors
 def delete_book(book_id: uuid.UUID) -> Response | str:
-    """Handles the deletion of a book."""
+    """
+
+    Delete a book by its UUID.
+
+    :param book_id: The UUID of the book to delete.
+    :type book_id: uuid.UUID
+
+    :return: A success message if the book is deleted, or an error message if the book is not found.
+    :rtype: str | Response
+
+    .. note::
+        This function deletes both the book and the associated author if it no longer has any books.
+    """
     with get_session() as session:
         book = session.get(Book, book_id)
         if not book:

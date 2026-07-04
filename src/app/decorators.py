@@ -10,8 +10,17 @@ logger = logging.getLogger(__name__)
 
 def handle_api_errors(func: Callable) -> Callable:
     """
-    Custom decorator to gracefully catch unexpected errors,
-    preventing sensitive stack trace leaks to the client.
+    Decorator to handle API errors and provide a standardized JSON response.
+
+    This decorator wraps any function that may raise an exception, catching both `HTTPException` for HTTP-specific errors and general exceptions for internal server errors. It logs the error details for critical issues and returns a JSON response with an appropriate error message and status code.
+
+    :param func: The function to be decorated.
+    :type func: Callable
+    :return: The wrapped function.
+    :rtype: Callable
+
+    :raises HTTPException: If the original function raises an `HTTPException`, it is caught and handled by returning a JSON response with the exception's name and description.
+    :raises Exception: For any other exceptions, the error is logged as a critical issue, and a JSON response with a generic "Internal Server Error" message and status code 500 is returned.
     """
 
     @wraps(func)

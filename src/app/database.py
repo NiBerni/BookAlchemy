@@ -1,4 +1,8 @@
-"""Database connection and session management."""
+"""
+Module to manage database sessions and initialize the database schema.
+
+This module provides functions to create a new database session and initialize the database schema. It uses SQLAlchemy for ORM operations.
+"""
 
 import logging
 import os
@@ -33,12 +37,24 @@ SessionFactory = sessionmaker(
 
 
 def get_session() -> Session:
-    """Provides a transactional scope around a series of operations."""
+    """
+    Create a new database session.
+
+    :return: A SQLAlchemy session object.
+    :rtype: Session
+    """
     return SessionFactory()
 
 
 def init_db() -> None:
-    """Initializes database tables. Call this within the app factory."""
+    """Initialize the database schema.
+
+    Create all tables defined in the models module using the provided engine.
+    This function ensures that the database is properly set up with the necessary tables
+    and logs the initialization URL for verification purposes.
+
+    :raises Exception: If an error occurs during the creation of the tables.
+    """
     from .models import Base
 
     Base.metadata.create_all(bind=engine)
