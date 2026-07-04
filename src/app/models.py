@@ -68,3 +68,18 @@ class Book(Base):
         orm_query = select(cls).from_statement(raw_query)
         result = session.execute(orm_query)
         return list(result.scalars().all())
+
+    @classmethod
+    def search_by_keyword_secure(cls, session: Any, keyword: str) -> List["Book"]:
+        """Search books by keyword in title using parameterized queries to prevent SQL injection."""
+        from sqlalchemy import select, tstring
+
+        search_pattern = f"%{keyword}%"
+
+        # 🚨 NEVER use f-strings here! Using PEP 750 t-strings (t"...")
+        # securely binds the variable at the database driver level.
+
+        raw_query = tstring(t"SELECT * FROM books WHERE title LIKE {search_pattern}")
+        orm_query = select(cls).from_statement(raw_query)
+        result = session.execute(orm_query)
+        return list(result.scalars().all())

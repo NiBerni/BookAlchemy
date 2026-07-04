@@ -38,13 +38,17 @@ def health_check() -> tuple[Response, int]:
 def home() -> Response | str:
     """Fetches books, handles sorting and constructs the cover image URL."""
     sort_by = request.args.get("sort_by", "title")
+    search_query = request.args.get("search", "").strip()
 
     with get_session() as session:
-        if sort_by == "author":
-            query = select(Book).join(Author).order_by(Author.name)
+        if search_query:
+            books_raw = Book.search_by_title(session, search_query)
         else:
-            query = select(Book).order_by(Book.title)
-        books_raw = session.execute(query).scalars().all()
+            if sort_by == "author":
+                query = select(Book).join(Author).order_by(Author.name)
+            else:
+                query = select(Book).order_by(Book.title)
+            books_raw = session.execute(query).scalars().all()
 
         books_data = []
         for book in books_raw:
@@ -56,7 +60,9 @@ def home() -> Response | str:
                     "cover_url": f"https://covers.openlibrary.org/b/isbn/{book.isbn}-M.jpg",
                 }
             )
-    return render_template("home.html", books=books_data, current_sort=sort_by)
+    return render_template(
+        "home.html", books=books_data, current_sort=sort_by, search_query=search_query
+    )
 
 
 @bp.route("/add_author", methods=["GET", "POST"])
@@ -143,3 +149,39 @@ def add_book() -> Response | str:
             return redirect(url_for("main.add_book"))
 
     return render_template("add_book.html")
+
+
+@bp.route("/book/<uuid:book_id>/delete", methods=["POST"])
+@handle_api_errors
+def delete_book(book_id: uuid.UUID) -> Response | str:
+    """Handles the deletion of a book."""
+    with get_session() as session:
+        book = session.get(Book, book_id)
+        if not book:
+            flash(" 404 Book not found.", "error")
+            return redirect(url_for("main.home"))
+
+        title = book.title
+        author = book.author
+
+        session.delete(book)
+        session.flush()
+
+        remaining_books = (
+            session.execute(select(Book).where(Book.author_id == author.id))
+            .scalars()
+            .first()
+        )
+
+        if not ramaining_books:
+            session.delete(author)
+            logger.info(
+                f'Deleted author "{author.name}" as they have no remaining books.'
+            )
+        session.commit()
+
+    flash(
+        f"Book '{title}' and its author '{author.name}' deleted successfully!",
+        "success",
+    )
+    return redirect(url_for("main.home"))

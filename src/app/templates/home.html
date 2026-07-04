@@ -3,14 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>Digital Library</title>
 </head>
 <body>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class="flashes">
+    {% for category, message in messages %}
+    <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<h1>My Digital Library</h1>
+
+<form action="/" method="GET">
+    <label for="search">Keyword Search:</label>
+    <input id="search" name="search" placeholder="Search by title..." type="text" value="{{ search_query }}">
+    <button type="submit">Search</button>
+    <a href="/">Clear</a>
+</form>
+<br>
+
+{% if not books %}
+<p>No books match your criteria.</p>
+{% else %}
 {% for book in books %}
-<div><h3>{{ book.title }}</h3>
+<div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; display: flex; align-items: center;">
+
+    <img alt="Cover of {{ book.title }}" src="{{ book.cover_url }}" style="max-height: 150px; margin-right: 20px;">
+
+    <div>
+        <h3>{{ book.title }}</h3>
+        <p><strong>Author:</strong> {{ book.author_name }}</p>
+        <p><strong>Published:</strong> {{ book.publication_year }}</p>
+
+        <form action="{{ url_for('main.delete_book', book_id=book.id) }}" method="POST"
+              onsubmit="return confirm('Are you sure you want to donate/delete this book?');">
+            <button style="color: red;" type="submit">Delete Book</button>
+        </form>
+    </div>
 </div>
 {% endfor %}
+{% endif %}
 
 </body>
 </html>
