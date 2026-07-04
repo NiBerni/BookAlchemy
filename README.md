@@ -20,7 +20,7 @@ This project uses Docker to provide an isolated and reproducible development env
 2. Start the environment by running the following command in your terminal:
 
 ```bash
-docker-compose up --build
+docker compose up --build -d
 ```
 
 3. The API will be available at: http://localhost:8000
