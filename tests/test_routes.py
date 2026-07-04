@@ -104,3 +104,78 @@ def test_home_page_sorting(client: FlaskClient) -> None:
     response = client.get("/?sort_by=title")
     html_content = response.data.decode("utf-8")
     assert html_content.find("Apple Facts") < html_content.find("Zebra Facts")
+
+
+def test_keyword_search(client: FlaskClient) -> None:
+    """Ensures the search function correctly uses t-string LIKE queries."""
+    with get_session() as session:
+        author = Author(name="J.R.R. Tolkien")
+        session.add_all(
+            [
+                Book(
+                    title="The Fellowship of the Ring",
+                    isbn="1111",
+                    publication_year=1954,
+                    author=author,
+                ),
+                Book(
+                    title="The Two Towers",
+                    isbn="2222",
+                    publication_year=1954,
+                    author=author,
+                ),
+            ]
+        )
+        session.commit()
+
+
+def test_delete_book_and_orphanm_athor(client: FlaskClient) -> None:
+    """Ensures that deleting a book also deletes the author if they have no other books."""
+    with get_session() as session:
+        author = Author(name="Herman Melville")
+        book = Book(
+            title="Moby Dick",
+            isbn="3333",
+            publication_year=1851,
+            author=author,
+        )
+        session.add(book)
+        session.commit()
+        book_id = book.id
+        author_id = author.id
+
+    response = client.post(f"/book/{book_id}/delete", follow_redirects=True)
+    assert response.status_code == 200
+
+    with get_session() as session:
+        assert session.get(Book, book_id) is None
+        assert session.get(Author, author_id) is None
+
+
+def test_delete_book_keeps_author_with_multiple_books(client: FlaskClient) -> None:
+    """Ensures deleting a book does NOT delete the author if they have other books."""
+    with get_session() as session:
+        author = Author(name="Stephan King")
+        book1 = Book(
+            title="The Shining",
+            isbn="4444",
+            publication_year=1977,
+            author=author,
+        )
+        book2 = Book(
+            title="It",
+            isbn="5555",
+            publication_year=1986,
+            author=author,
+        )
+        session.add_all([book1, book2])
+        session.commit()
+        book1_id = book1.id
+        author_id = author.id
+
+    response = client.post(f"/book/{book1_id}/delete", follow_redirects=True)
+    assert response.status_code == 200
+
+    with get_session() as session:
+        assert session.get(Book, book1_id) is None
+        assert session.get(Author, author_id) is not None
